@@ -1,3 +1,4 @@
+DROP DATABASE IF EXISTS reviewsData;
 CREATE DATABASE reviewsData;
 
 \c reviewsdata
@@ -22,9 +23,14 @@ CREATE DATABASE reviewsData;
 
 -- AFTER SEEING THE DATA
 
+
+CREATE TABLE IF NOT EXISTS products (
+  id integer primary key
+);
+
 CREATE TABLE IF NOT EXISTS reviews (
   id integer primary key,
-  product_id integer,
+  product_id integer references products(id),
   rating integer,
   date_posted bigint,
   summary varchar(255),
@@ -45,6 +51,6 @@ CREATE TABLE IF NOT EXISTS reviewsPhotos (
 
 CREATE TABLE IF NOT EXISTS characteristics (
   id integer primary key,
-  product_id integer,
+  product_id integer references products(id),
   characteristics_name varchar(25)
 );
