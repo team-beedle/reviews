@@ -5,23 +5,16 @@ const app = express();
 
 app.get('/reviews/', (req, res) => {
   db.queryReviews(req.query.product_id, (err, result) => {
-    if (err) {
-      console.error(err);
-    } else {
-      res.status(200).send(result);
-    }
+    if (err) { throw err; }
+    res.status(200).send(result);
   }, req.query.page, req.query.count, req.query.sort);
 });
 
 
-app.get('/', (req, res) => {
-  console.log(req.query);
-  db.queryReviews(req.query.product_id, (err, result) => {
-    if (err) {
-      console.error(err);
-    } else {
-      res.status(200).send(result.rows);
-    }
+app.get('/reviews/meta', (req, res) => {
+  db.buildMeta(req.query.product_id, (err, result) => {
+    if (err) { throw err; }
+    res.status(200).send(result);
   });
 });
 
