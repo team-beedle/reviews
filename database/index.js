@@ -66,47 +66,33 @@ const queryReviews = (id, callback, page=1, count=5, sort='newest') => {
     });
 };
 
-const buildRatings = (product_id, callback) => {
-  const ratingsQuery = `
-    SELECT rating
-    FROM reviews
-    WHERE product_id=${product_id}
-  `;
-
-  const ratings = {};
-
-  return pool.query(ratingsQuery)
-    .then((results) => {
-      for(const row of results.rows) {
-        if(ratings[row.rating]) {
-          ratings[row.rating] += 1;
-        } else {
-          ratings[row.rating] = 1;
-        }
-      }
-    })
-    .then(() => {
-      return callback(ratings);
-    })
-    .catch((err) => {
-      throw err;
-    });
-};
-
 const buildMeta = async (product_id, callback) => {
-  const metaQuery = `
-    SELECT recommend
-    FROM reviews
-    WHERE product_id=${product_id}
-    AND recommend=true
-  `;
+  const recQuery = `SELECT recommend FROM reviews WHERE product_id=${product_id} AND recommend=true`;
+  const ratingsQuery = `SELECT rating FROM reviews WHERE product_id=${product_id}`;
+  const charaQuery = `SELECT * FROM characteristics WHERE product_id=${product_id}`;
 
   const metadata = { product_id };
 
-  metadata.recommended = await pool.query(metaQuery)
-    .then((results) => { return { 0: results.rows.length }; });
+  metadata.recommended = await pool.query(recQuery)
+    .then((results) => { return { 0: results.rows.length }; })
+    .catch((err) => { throw err; });
 
-  metadata.ratings = await buildRatings(product_id, (ratings) => { return ratings; });
+  metadata.ratings = await pool.query(ratingsQuery)
+    .then((results) => {
+      const ratings = {};
+
+      for(const row of results.rows) {
+        if(!ratings[row.rating]) { ratings[row.rating] = 1; }
+        else { ratings[row.rating] += 1; }
+      }
+
+      return ratings;
+    })
+    .catch((err) => {throw err; });
+
+  metadata.characteristics = await pool.query(charaQuery)
+    .then((results) => { return results.rows; })
+    .catch((err) => { throw err; });
 
   callback(null, metadata);
 };

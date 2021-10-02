@@ -21,3 +21,4 @@ CSV HEADER;
 
 CREATE INDEX products_from_reviews ON reviews(product_id);
 CREATE INDEX reviews_from_photos ON reviewsphotos(review_id);
+CREATE INDEX products_from_characteristics ON characteristics(product_id);
