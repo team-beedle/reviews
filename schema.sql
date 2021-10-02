@@ -3,27 +3,6 @@ CREATE DATABASE reviewsData;
 
 \c reviewsdata
 
--- BEFORE SEEING THE DATA
-
--- CREATE TABLE reviews (
---   id SERIAL PRIMARY KEY,
---   starRating Decimal(2,2),
---   summary varchar(255),
---   reviewBody varchar(1000),
---   reviewDate Date,
---   reviewer varchar(20),
---   helpfulness boolean
--- );
-
--- CREATE TABLE photo (
---   id SERIAL PRIMARY KEY,
---   review SERIAL references reviews(id),
---   url varchar(255)
--- );
-
--- AFTER SEEING THE DATA
-
-
 CREATE TABLE IF NOT EXISTS products (
   id integer primary key
 );
@@ -53,4 +32,11 @@ CREATE TABLE IF NOT EXISTS characteristics (
   id integer primary key,
   product_id integer references products(id),
   characteristics_name varchar(25)
+);
+
+CREATE TABLE IF NOT EXISTS characteristicReviews (
+  id integer primary key,
+  characteristic_id integer references characteristics(id),
+  review_id integer references reviews(id),
+  characteristic_value integer
 );

@@ -20,7 +20,7 @@ const queryReviewsPhotos = (review_id, callback) => {
     });
 };
 
-const queryReviews = (id, callback, page=1, count=5, sort='newest') => {
+const queryReviews = (id, callback, page=1, count=6, sort='newest') => {
   const body = {
     product: id,
     page: page - 1,
@@ -72,6 +72,7 @@ const buildMeta = async (product_id, callback) => {
   const charaQuery = `SELECT * FROM characteristics WHERE product_id=${product_id}`;
 
   const metadata = { product_id };
+  // { product_id: 3 }
 
   metadata.recommended = await pool.query(recQuery)
     .then((results) => { return { 0: results.rows.length }; })
@@ -91,10 +92,95 @@ const buildMeta = async (product_id, callback) => {
     .catch((err) => {throw err; });
 
   metadata.characteristics = await pool.query(charaQuery)
-    .then((results) => { return results.rows; })
+    .then((results) => {
+      const characteristics = {};
+
+      for(const row of results.rows) {
+        characteristics[row.characteristics_name] = {
+          id: row.id,
+          value: 'placeholder',
+        }
+      }
+
+      return characteristics;
+    })
     .catch((err) => { throw err; });
 
   callback(null, metadata);
 };
 
-module.exports = { queryReviews, buildMeta };
+const postReview = async (request, callback) => {
+  // product_id	integer	Required ID of the product to post the review for
+  // rating	int	Integer (1-5) indicating the review rating
+  // summary	text	Summary text of the review
+  // body	text	Continued or full text of the review
+  // recommend	bool	Value indicating if the reviewer recommends the product
+  // name	text	Username for question asker
+  // email	text	Email address for question asker
+  // photos	[text]	Array of text urls that link to images to be shown
+  // characteristics	object	Object of keys representing characteristic_id and values representing the review value for that characteristic. { "14": 5, "15": 5 //...}
+
+
+
+  const post = {
+    text: `
+      INSERT INTO reviews (
+        id, product_id, rating,
+        date_posted, summary, body,
+        recommend, reported,
+        reviewer_name, reviewer_email
+      )
+      VALUES (
+        nextval('serial_review_id'),
+        $1, $2, $3, $4, $5, $6, $7, $8, $9
+      )
+    `,
+    values: [
+      request.product_id,
+      request.rating,
+      Number(new Date()),
+      request.summary,
+      request.body,
+      request.recommend,
+      false,
+      request.name,
+      request.email,
+    ]
+  };
+
+  await pool.query(post)
+    .catch((err) => {
+      throw err;
+    });
+
+  for(const url of request.photos) {
+    const photosPost = {
+      text: `
+        INSERT INTO reviewsphotos (id, review_id, photo_url)
+        VALUES (nextval('serial_review_photos'),
+        (SELECT id FROM reviews ORDER BY id DESC FETCH NEXT 1 ROWS ONLY),
+        $1)
+      `,
+      values: [url]
+    };
+
+    await pool.query(photosPost);
+  }
+
+  for(const key in request.characteristics) {
+    const charasPost = {
+        text: `
+          INSERT INTO characteristics (id, product_id, characteristics_name)
+          VALUES (nextval('serial_review_charas'), $1, (SELECT characteristics_name FROM characteristics WHERE id=$2))
+        `,
+        values: [request.product_id, key]
+    }
+
+    await pool.query(charasPost);
+  }
+
+  callback(null, post);
+
+};
+
+module.exports = { queryReviews, buildMeta, postReview };
