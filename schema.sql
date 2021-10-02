@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS products (
 );
 
 CREATE TABLE IF NOT EXISTS reviews (
-  id integer primary key,
+  review_id integer primary key,
   product_id integer references products(id),
   rating integer,
   date_posted bigint,
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS reviews (
   reported boolean,
   reviewer_name varchar(50),
   reviewer_email varchar(50),
-  response varchar(255),
+  response varchar(255) default,
   helpfulness integer
 );
 

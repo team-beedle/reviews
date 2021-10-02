@@ -3,14 +3,14 @@ const db = require('../database/index.js');
 
 const app = express();
 
-app.get('/meta', (req, res) => {
+app.get('/reviews/', (req, res) => {
   db.queryReviews(req.query.product_id, (err, result) => {
     if (err) {
       console.error(err);
     } else {
-      res.status(200).send(result.rows);
+      res.status(200).send(result);
     }
-  });
+  }, req.query.page, req.query.count, req.query.sort);
 });
 
 

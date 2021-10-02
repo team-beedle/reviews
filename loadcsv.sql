@@ -18,3 +18,6 @@ COPY reviewsphotos(id, review_id, photo_url)
 FROM '/Users/jandeandeocampo/Desktop/reviews_photos.csv'
 DELIMITER ','
 CSV HEADER;
+
+CREATE INDEX products_from_reviews ON reviews(product_id);
+CREATE INDEX reviews_from_photos ON reviewsphotos(review_id);
