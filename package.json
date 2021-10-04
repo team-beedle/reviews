@@ -10,7 +10,9 @@
   "author": "jan",
   "license": "ISC",
   "dependencies": {
+    "compression": "^1.7.4",
     "express": "^4.17.1",
+    "k6": "0.0.0",
     "nodemon": "^2.0.13",
     "pg": "^8.7.1"
   }
