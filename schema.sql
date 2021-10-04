@@ -18,13 +18,13 @@ CREATE TABLE IF NOT EXISTS reviews (
   reported boolean,
   reviewer_name varchar(50),
   reviewer_email varchar(50),
-  response varchar(255) default,
+  response varchar(255),
   helpfulness integer
 );
 
 CREATE TABLE IF NOT EXISTS reviewsPhotos (
   id integer primary key,
-  review_id integer references reviews(id),
+  review_id integer references reviews(review_id),
   photo_url varchar(255)
 );
 
@@ -37,6 +37,6 @@ CREATE TABLE IF NOT EXISTS characteristics (
 CREATE TABLE IF NOT EXISTS characteristicReviews (
   id integer primary key,
   characteristic_id integer references characteristics(id),
-  review_id integer references reviews(id),
+  review_id integer references reviews(review_id),
   characteristic_value integer
 );

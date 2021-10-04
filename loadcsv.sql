@@ -4,7 +4,7 @@
 
 COPY products(id) FROM '/Users/jandeandeocampo/Desktop/product_id.csv' DELIMITER ',' CSV HEADER;
 
-COPY reviews(id, product_id, rating, date_posted, summary, body, recommend, reported, reviewer_name, reviewer_email, response, helpfulness)
+COPY reviews(review_id, product_id, rating, date_posted, summary, body, recommend, reported, reviewer_name, reviewer_email, response, helpfulness)
 FROM '/Users/jandeandeocampo/Desktop/reviews.csv'
 DELIMITER ','
 CSV HEADER;
@@ -26,7 +26,6 @@ CSV HEADER;
 
 CREATE INDEX products_from_reviews ON reviews(product_id);
 CREATE INDEX reviews_from_photos ON reviewsphotos(review_id);
-CREATE INDEX products_from_characteristics ON characteristics(product_id);
 CREATE SEQUENCE serial_review_id START 5774953;
-CREATE SEQUENCE serial_review_photos START 2742540;
-CREATE SEQUENCE serial_review_charas START 3347680;
+CREATE SEQUENCE serial_review_photos START 2742541;
+CREATE SEQUENCE serial_review_charas START 19327576;
