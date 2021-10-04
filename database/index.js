@@ -1,5 +1,4 @@
 const { Pool } = require('pg');
-const bluebird = require('bluebird');
 
 const pool = new Pool({
   user: 'jandeandeocampo',
@@ -8,8 +7,52 @@ const pool = new Pool({
   port: 5432,
 });
 
-const queryReviewsPhotos = (review_id, callback) => {
-  const photosQuery = `SELECT * FROM reviewsphotos WHERE review_id=${review_id}`;
+const getReviewsForProduct = (product_id, callback, page=1, count=5, sort='newest') => {
+  const body = {
+    product: product_id,
+    page: page - 1,
+    count: count,
+  };
+
+  const getReviewsForProductQuery = `
+    SELECT * FROM reviews
+    WHERE product_id = ${product_id}
+    AND reported = false
+    ORDER BY review_id
+    OFFSET (${(page - 1) * count}) ROWS
+    FETCH NEXT ${count} ROWS ONLY
+  `;
+
+  pool.query(getReviewsForProductQuery)
+    .then((results) => {
+      return results.rows.slice();
+    })
+    .then(async (rows) => {
+      const newRows = [];
+
+      for(let row of rows) {
+        const rowWithPhotos =
+          await _getPhotosForReview(row.review_id, (photos) => {
+            row.photos = photos;
+            return row;
+          });
+
+        newRows.push(rowWithPhotos);
+      }
+
+      body.results = newRows;
+      callback(null, body);
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
+
+const _getPhotosForReview = (review_id, callback) => {
+  const photosQuery = `
+    SELECT * FROM reviewsphotos
+    WHERE review_id=${review_id}
+  `;
 
   return pool.query(photosQuery)
     .then((results) => {
@@ -20,68 +63,22 @@ const queryReviewsPhotos = (review_id, callback) => {
     });
 };
 
-const queryReviews = (id, callback, page=1, count=5, sort='newest') => {
-  const body = {
-    product: id,
-    page: page - 1,
-    count: count,
-  };
-
-  const pagesQuery = {
-    text: `
-      SELECT * FROM reviews
-      WHERE product_id=${id}
-      ORDER BY review_id
-      OFFSET (($1 - 1) * $2) ROWS
-      FETCH NEXT $2 ROWS ONLY
-    `,
-    values: [page, count],
-  };
-
-  pool.query(pagesQuery)
-    .then((results) => {
-      return results.rows.slice();
-    })
-    .then((rows) => {
-      const newRows = [];
-
-      for(let row of rows) {
-        newRows.push(queryReviewsPhotos(row.review_id, (photos) => {
-          row.photos = photos;
-          return row;
-        }));
-      }
-
-      Promise.all(newRows)
-        .then((results) => {
-          body.results = results;
-          callback(null, body);
-        })
-        .catch((err) => {
-          throw err;
-        });
-    })
-    .catch((err) => {
-      throw err;
-    });
-};
-
 const buildMeta = async (product_id, callback) => {
   const recQuery = `
     SELECT recommend
     FROM reviews
-    WHERE product_id=${product_id}
-    AND recommend=true
+    WHERE product_id = ${product_id}
+    AND recommend = true
   `;
 
   const ratingsQuery = `
     SELECT rating FROM reviews
-    WHERE product_id=${product_id}
+    WHERE product_id = ${product_id}
   `;
 
   const charaQuery = `
     SELECT * FROM characteristics
-    WHERE product_id=${product_id}
+    WHERE product_id = ${product_id}
   `;
 
   const metadata = { product_id };
@@ -197,14 +194,11 @@ const postReview = async (request, callback) => {
 };
 
 const markReviewAsHelpful = (review_id, callback) => {
-  const addToHelpfulnessQuery = {
-    text: `
-      UPDATE reviews
-      SET helpfulness = helpfulness + 1
-      WHERE review_id = $1
-    `,
-    values: [review_id]
-  };
+  const addToHelpfulnessQuery = `
+    UPDATE reviews
+    SET helpfulness = helpfulness + 1
+    WHERE review_id = ${review_id}
+  `;
 
   pool.query(addToHelpfulnessQuery)
     .then((results) => {
@@ -215,9 +209,26 @@ const markReviewAsHelpful = (review_id, callback) => {
     });
 };
 
+const reportReview = (review_id, callback) => {
+  const reportReviewQuery = `
+    UPDATE reviews
+    SET reported = true
+    WHERE review_id = ${review_id}
+  `;
+
+  pool.query(reportReviewQuery)
+    .then((results) => {
+      callback(null, results);
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
+
 module.exports = {
-  queryReviews,
+  getReviewsForProduct,
   buildMeta,
   postReview,
-  markReviewAsHelpful
+  markReviewAsHelpful,
+  reportReview
 };

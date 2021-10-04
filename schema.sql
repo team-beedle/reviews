@@ -68,5 +68,6 @@ FROM '/Users/jandeandeocampo/Desktop/characteristic_reviews.csv'
 DELIMITER ','
 CSV HEADER;
 
+CREATE INDEX reviews_from_reviews ON reviews(review_id);
 CREATE INDEX products_from_reviews ON reviews(product_id);
 CREATE INDEX reviews_from_photos ON reviewsphotos(review_id);
