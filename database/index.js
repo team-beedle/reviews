@@ -67,12 +67,24 @@ const queryReviews = (id, callback, page=1, count=5, sort='newest') => {
 };
 
 const buildMeta = async (product_id, callback) => {
-  const recQuery = `SELECT recommend FROM reviews WHERE product_id=${product_id} AND recommend=true`;
-  const ratingsQuery = `SELECT rating FROM reviews WHERE product_id=${product_id}`;
-  const charaQuery = `SELECT * FROM characteristics WHERE product_id=${product_id}`;
+  const recQuery = `
+    SELECT recommend
+    FROM reviews
+    WHERE product_id=${product_id}
+    AND recommend=true
+  `;
+
+  const ratingsQuery = `
+    SELECT rating FROM reviews
+    WHERE product_id=${product_id}
+  `;
+
+  const charaQuery = `
+    SELECT * FROM characteristics
+    WHERE product_id=${product_id}
+  `;
 
   const metadata = { product_id };
-  // { product_id: 3 }
 
   metadata.recommended = await pool.query(recQuery)
     .then((results) => { return { 0: results.rows.length }; })
@@ -110,18 +122,11 @@ const buildMeta = async (product_id, callback) => {
 };
 
 const postReview = async (request, callback) => {
-  // product_id	integer	Required ID of the product to post the review for
-  // rating	int	Integer (1-5) indicating the review rating
-  // summary	text	Summary text of the review
-  // body	text	Continued or full text of the review
-  // recommend	bool	Value indicating if the reviewer recommends the product
-  // name	text	Username for question asker
-  // email	text	Email address for question asker
-  // photos	[text]	Array of text urls that link to images to be shown
-  // characteristics	object	Object of keys representing characteristic_id and values representing the review value for that characteristic. { "14": 5, "15": 5 //...}
-
-
   const _timestamp = Number(new Date());
+  const {
+    product_id, rating, summary, body,
+    recommend, name, email,
+  } = request;
 
   const post = {
     text: `
@@ -137,15 +142,9 @@ const postReview = async (request, callback) => {
       )
     `,
     values: [
-      request.product_id,
-      request.rating,
-      _timestamp,
-      request.summary,
-      request.body,
-      request.recommend,
-      false,
-      request.name,
-      request.email,
+      product_id, rating, _timestamp,
+      summary, body, recommend,
+      false, name, email,
     ]
   };
 
@@ -162,6 +161,9 @@ const postReview = async (request, callback) => {
   `)
     .then((results) => {
       return results.rows[0].review_id;
+    })
+    .catch((err) => {
+      throw err;
     });
 
   for(const url of request.photos) {
@@ -173,7 +175,8 @@ const postReview = async (request, callback) => {
       values: [_review_id, url]
     };
 
-    await pool.query(photosPost);
+    await pool.query(photosPost)
+      .catch((err) => { throw err; });
   }
 
   for(const key in request.characteristics) {
@@ -186,7 +189,8 @@ const postReview = async (request, callback) => {
         values: [key, _review_id, request.characteristics[key]]
     }
 
-    await pool.query(charasPost);
+    await pool.query(charasPost)
+      .catch((err) => { throw err; });
   }
 
   callback(null, post);
