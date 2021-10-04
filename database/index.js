@@ -196,4 +196,28 @@ const postReview = async (request, callback) => {
   callback(null, post);
 };
 
-module.exports = { queryReviews, buildMeta, postReview };
+const markReviewAsHelpful = (review_id, callback) => {
+  const addToHelpfulnessQuery = {
+    text: `
+      UPDATE reviews
+      SET helpfulness = helpfulness + 1
+      WHERE review_id = $1
+    `,
+    values: [review_id]
+  };
+
+  pool.query(addToHelpfulnessQuery)
+    .then((results) => {
+      callback(null, results);
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
+
+module.exports = {
+  queryReviews,
+  buildMeta,
+  postReview,
+  markReviewAsHelpful
+};

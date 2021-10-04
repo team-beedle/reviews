@@ -27,4 +27,11 @@ app.post('/reviews/', (req, res) => {
   });
 });
 
+app.put('/reviews/:review_id/helpful', (req, res) => {
+  db.markReviewAsHelpful(req.params.review_id, (err, result) => {
+    if (err) { throw err; }
+    res.status(204).send(result);
+  })
+})
+
 module.exports = app;
