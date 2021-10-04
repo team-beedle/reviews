@@ -7,7 +7,7 @@ const pool = new Pool({
   port: 5432,
 });
 
-const getReviewsForProduct = (product_id, callback, page=1, count=5, sort='newest') => {
+const getReviewsForProduct = async (product_id, callback, page=1, count=5, sort='newest') => {
   const body = {
     product: product_id,
     page: page - 1,
@@ -23,7 +23,7 @@ const getReviewsForProduct = (product_id, callback, page=1, count=5, sort='newes
     FETCH NEXT ${count} ROWS ONLY
   `;
 
-  pool.query(getReviewsForProductQuery)
+  await pool.query(getReviewsForProductQuery)
     .then((results) => {
       return results.rows.slice();
     })
@@ -48,10 +48,10 @@ const getReviewsForProduct = (product_id, callback, page=1, count=5, sort='newes
     });
 };
 
-const _getPhotosForReview = (review_id, callback) => {
+const _getPhotosForReview = async (review_id, callback) => {
   const photosQuery = `
     SELECT * FROM reviewsphotos
-    WHERE review_id=${review_id}
+    WHERE review_id = ${review_id}
   `;
 
   return pool.query(photosQuery)
