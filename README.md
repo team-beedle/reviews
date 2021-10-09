@@ -24,3 +24,7 @@ Requests are divided on a least connections basis between the two Express server
 In the end I managed to have a stable load of 1000 requests per second at ~14ms response times.
 
 I also indexed columns that I used for queries with B-Trees for faster lookups.
+
+## Contact
+
+[![LinkedIn](https://img.shields.io/badge/linkedin-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/jandeo/)
