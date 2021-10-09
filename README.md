@@ -17,6 +17,8 @@ Team Beedle was tasked with building services to replace the backend of an exist
 
 The Reviews service uses a distributed structure of 2 identical Node/Express instances to manage HTTP requests, and 1 Postgres instance with access to millions of records. Load is balanced through an Nginx server, which performs general cacheing and keepalive connections to manage largely uninterrupted traffic.
 
+![lucid](https://github.com/team-beedle/reviews/blob/main/images/lucid.png)
+
 Requests are divided on a least connections basis between the two Express servers. During a period of testing, I used a backup Express server configured in the same machine as the Postgres database, in order to handle overflow. There is a slight positive performance difference when this server is switched on, but I quickly ran out of connection resources. In the last part of the project, I focused on managing these resources through Nginx configurations.
 
 In the end I managed to have a stable load of 1000 requests per second at ~14ms response times.
