@@ -25,6 +25,7 @@ In the end I managed to have a stable load of 1000 requests per second at ~14ms 
 
 I also indexed columns that I used for queries with B-Trees for faster lookups.
 
-## Contact
+## My Contact Info
 
 [![LinkedIn](https://img.shields.io/badge/linkedin-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/jandeo/)
+[![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Darumin)
