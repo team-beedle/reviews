@@ -1,3 +1,8 @@
+![Nginx](https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white)
+![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)
+
+
 # Reviews
 
 Team Beedle was tasked with building services to replace the backend of an existing ecommerce website. The goal was to minimize the impact to the frontend and design an API that is scalable, efficient and delivered significantly fast response times. 
